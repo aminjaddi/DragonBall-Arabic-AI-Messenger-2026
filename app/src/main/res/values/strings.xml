@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Dragon Ball Messenger</string>
+    <string name="app_tagline">مراسلة حية مع أبطال دراغون بول باللغة العربية الفصحى</string>
+    <string name="nav_chats">المحادثات</string>
+    <string name="nav_characters">الشخصيات</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="nav_about">حول التطبيق</string>
+    <string name="btn_send">إرسال</string>
+    <string name="hint_message">اكتب رسالتك باللغة العربية الفصحى…</string>
+    <string name="chat_new">محادثة جديدة</string>
+    <string name="chat_clear">مسح المحادثة</string>
+    <string name="chat_delete_confirm">هل أنت متأكد من رغبتك في مسح سجل هذه المحادثة؟</string>
+    <string name="btn_confirm">تأكيد</string>
+    <string name="btn_cancel">إلغاء</string>
+    <string name="status_online">متصل الآن</string>
+    <string name="status_typing">يكتب الآن…</string>
+    <string name="status_thinking">يفكّر في الرد…</string>
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_api_key">مفتاح الذكاء الاصطناعي (Gemini API)</string>
+    <string name="settings_api_key_desc">يمكنك استخدام المفتاح الافتراضي المدمج أو إدخال مفتاحك الخاص من Google AI Studio مجانًا.</string>
+    <string name="settings_free_tier_info">ملاحظة: خدمة Gemini توفر طبقة استخدام مجانية بالكامل للنماذج السريعة مثل gemini-3.5-flash دون حاجة لبطاقة دفع.</string>
+    <string name="settings_admob">إعدادات الإعلانات (Google AdMob)</string>
+    <string name="settings_admob_desc">تفعيل أو إدخال معرّفات AdMob المعتمدة.</string>
+    <string name="settings_privacy">سياسة الخصوصية</string>
+    <string name="about_title">حول التطبيق</string>
+    <string name="about_developer">المطور: Amino Boule</string>
+    <string name="about_tiktok_btn">زيارة حساب تيك توك للمطور</string>
+    <string name="safety_violation">تنبيه: نلتزم بالاحترام والأخلاق الكريمة ونجتنب أي ألفاظ مسيئة أو تمس المقدسات الدينية.</string>
+    <string name="error_network">تعذر الاتصال بخدمة الذكاء الاصطناعي. يرجى التحقق من اتصال الإنترنت والمحاولة مجددًا.</string>
+    <string name="character_info">معلومات الشخصية</string>
+    <string name="character_powers">القدرات والتقنيات</string>
+    <string name="character_story">القصة والخلفية</string>
+    <string name="character_relationships">العلاقات</string>
+</resources>
+

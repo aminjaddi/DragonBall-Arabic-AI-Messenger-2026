@@ -1,0 +1,7 @@
+{
+  "name": "Dragon Ball Messenger",
+  "description": "تطبيق مراسلة ذكي للتحدث باللغة العربية الفصحى مع شخصيات دراغون بول: غوكو، فيجيتا، بيروس، ويز، زينو، وفريزا بردود موجزة وسياق متصل.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
