@@ -26,7 +26,13 @@ data class GenerationConfig(
     @Json(name = "temperature") val temperature: Float? = null,
     @Json(name = "topP") val topP: Float? = null,
     @Json(name = "topK") val topK: Int? = null,
-    @Json(name = "maxOutputTokens") val maxOutputTokens: Int? = null
+    @Json(name = "maxOutputTokens") val maxOutputTokens: Int? = null,
+    @Json(name = "thinkingConfig") val thinkingConfig: ThinkingConfig? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class ThinkingConfig(
+    @Json(name = "thinkingBudget") val thinkingBudget: Int = 0
 )
 
 @JsonClass(generateAdapter = true)

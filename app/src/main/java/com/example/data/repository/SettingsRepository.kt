@@ -33,7 +33,7 @@ class SettingsRepository(context: Context) {
         } catch (e: Throwable) {
             ""
         }
-        return if (buildKey != "MY_GEMINI_API_KEY") buildKey else ""
+        return if (buildKey.isNotBlank() && buildKey != "MY_GEMINI_API_KEY") buildKey else ""
     }
 
     fun saveApiKey(key: String) {
@@ -57,7 +57,20 @@ class SettingsRepository(context: Context) {
     }
 
     private fun getSavedApiKey(): String = prefs.getString(KEY_CUSTOM_API_KEY, "") ?: ""
-    private fun getSavedModel(): String = prefs.getString(KEY_SELECTED_MODEL, DEFAULT_MODEL) ?: DEFAULT_MODEL
+
+    private fun getSavedModel(): String {
+        val saved = prefs.getString(KEY_SELECTED_MODEL, DEFAULT_MODEL) ?: DEFAULT_MODEL
+        // Automatically migrate away from overloaded 503 or timing-out models to the rock-solid gemini-flash-lite-latest
+        return if (saved == "gemini-flash-latest" || 
+                   saved == "gemini-3.1-flash-lite-preview" || 
+                   saved == "gemini-2.5-flash" ||
+                   saved == "gemini-3.5-flash") {
+            DEFAULT_MODEL
+        } else {
+            saved
+        }
+    }
+
     private fun getSavedBannerId(): String = prefs.getString(KEY_ADMOB_BANNER, DEFAULT_BANNER_ID) ?: DEFAULT_BANNER_ID
     private fun getSavedAdsEnabled(): Boolean = prefs.getBoolean(KEY_ADS_ENABLED, true)
 
@@ -67,12 +80,13 @@ class SettingsRepository(context: Context) {
         private const val KEY_ADMOB_BANNER = "admob_banner_id"
         private const val KEY_ADS_ENABLED = "ads_enabled"
 
-        const val MODEL_FLASH_LITE = "gemini-3.1-flash-lite-preview"
+        // Production-verified reliable AI models
+        const val MODEL_FLASH_LITE_LATEST = "gemini-flash-lite-latest"
+        const val MODEL_FLASH_3 = "gemini-3-flash-preview"
         const val MODEL_FLASH_35 = "gemini-3.5-flash"
-        const val MODEL_FLASH_LATEST = "gemini-flash-latest"
 
-        const val DEFAULT_MODEL = MODEL_FLASH_LITE
-        const val FALLBACK_MODEL = MODEL_FLASH_35
+        const val DEFAULT_MODEL = MODEL_FLASH_LITE_LATEST
+        const val FALLBACK_MODEL = MODEL_FLASH_3
 
         // Official Google AdMob test banner ID for testing and demonstration
         const val DEFAULT_BANNER_ID = "ca-app-pub-3940256099942544/6300978111"

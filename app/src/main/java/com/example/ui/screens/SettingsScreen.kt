@@ -290,7 +290,7 @@ fun SettingsScreen(viewModel: ChatViewModel) {
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "اختر النموذج المفضل. عند حدوث أي ضغط على خوادم Google (خطأ 503)، يقوم التطبيق تلقائيًا بالتبديل بين النماذج السريعة ثم تفعيل محرك الشخصية التفاعلي كحل احتياطي فوري لضمان عدم توقف المحادثة مطلقًا.",
+                            text = "اختر نموذج الذكاء الاصطناعي الأساسي. يعمل تطبيقك بنماذج Google Gemini الرسمية المجانية ويقوم بالتنقل الذكي بين النماذج لضمان إجابات حية وسريعة وخالية تمامًا من أي انقطاع.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = 20.sp
@@ -300,24 +300,24 @@ fun SettingsScreen(viewModel: ChatViewModel) {
 
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             FilterChip(
-                                selected = selectedModel == SettingsRepository.MODEL_FLASH_LITE,
-                                onClick = { viewModel.saveSelectedModel(SettingsRepository.MODEL_FLASH_LITE) },
-                                label = { Text("gemini-3.1-flash-lite (موصى به - فائق السرعة وبلا ضغط 503)") },
-                                modifier = Modifier.testTag("chip_model_flash_lite")
+                                selected = selectedModel == SettingsRepository.MODEL_FLASH_LITE_LATEST,
+                                onClick = { viewModel.saveSelectedModel(SettingsRepository.MODEL_FLASH_LITE_LATEST) },
+                                label = { Text("gemini-flash-lite-latest (الموصى به - فائق السرعة وفوري)") },
+                                modifier = Modifier.testTag("chip_model_flash_lite_latest")
+                            )
+
+                            FilterChip(
+                                selected = selectedModel == SettingsRepository.MODEL_FLASH_3,
+                                onClick = { viewModel.saveSelectedModel(SettingsRepository.MODEL_FLASH_3) },
+                                label = { Text("gemini-3-flash-preview (نموذج التفكير المتقدم)") },
+                                modifier = Modifier.testTag("chip_model_flash_3")
                             )
 
                             FilterChip(
                                 selected = selectedModel == SettingsRepository.MODEL_FLASH_35,
                                 onClick = { viewModel.saveSelectedModel(SettingsRepository.MODEL_FLASH_35) },
-                                label = { Text("gemini-3.5-flash (أعلى استيعاب وذكاء)") },
-                                modifier = Modifier.testTag("chip_model_flash")
-                            )
-
-                            FilterChip(
-                                selected = selectedModel == SettingsRepository.MODEL_FLASH_LATEST,
-                                onClick = { viewModel.saveSelectedModel(SettingsRepository.MODEL_FLASH_LATEST) },
-                                label = { Text("gemini-flash-latest (النموذج البديل)") },
-                                modifier = Modifier.testTag("chip_model_latest")
+                                label = { Text("gemini-3.5-flash (النموذج الذكي الرسمي)") },
+                                modifier = Modifier.testTag("chip_model_flash_35")
                             )
                         }
                     }

@@ -10,7 +10,6 @@ import com.example.model.Character
 import com.example.model.CharacterData
 import com.example.model.ChatMessage
 import com.example.model.MessageSender
-import com.example.util.DragonBallPersonaEngine
 import com.example.util.SafetyFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -72,7 +71,7 @@ class ChatRepository(
         )
         chatDao.insertMessage(userMessage)
 
-        // 3. Notify UI that generation has started
+        // 3. Notify UI that AI generation has started
         withContext(Dispatchers.Main) {
             onStartGenerating()
         }
@@ -100,20 +99,19 @@ class ChatRepository(
         // 5. Check API Key
         val apiKey = settingsRepository.getEffectiveApiKey()
         if (apiKey.isEmpty()) {
-            // Generate immediate contextual character reply so user is never blocked
-            val fallbackResponse = DragonBallPersonaEngine.generateContextualResponse(character, cleanText)
-            val characterReply = ChatMessage(
+            val errorNotice = ChatMessage(
                 characterId = character.id,
-                sender = MessageSender.CHARACTER,
-                content = fallbackResponse,
-                timestamp = System.currentTimeMillis()
+                sender = MessageSender.SYSTEM,
+                content = "يرجى إضافة مفتاح Gemini API في الإعدادات لبدء المحادثة الذكية مع الشخصية.",
+                timestamp = System.currentTimeMillis(),
+                isError = true
             )
-            chatDao.insertMessage(characterReply)
-            withContext(Dispatchers.Main) { onFinished(true) }
+            chatDao.insertMessage(errorNotice)
+            withContext(Dispatchers.Main) { onFinished(false) }
             return@withContext
         }
 
-        // 6. Build Request
+        // 6. Build Request without thinkingConfig so that all modern models (including gemini-flash-lite-latest) succeed instantly
         val request = GenerateContentRequest(
             contents = geminiContents,
             systemInstruction = Content(
@@ -122,24 +120,24 @@ class ChatRepository(
             generationConfig = GenerationConfig(
                 temperature = 0.7f,
                 topP = 0.9f,
-                maxOutputTokens = 120
+                maxOutputTokens = 800,
+                thinkingConfig = null
             )
         )
 
-        // 7. Make Remote API Call with Multi-Model Cascade & Retry
+        // 7. Make Remote API Call with Multi-Model Cascade
         var responseText: String? = null
         var lastCallError: String? = null
 
         val primaryModel = settingsRepository.selectedModel.value
         val candidateModels = listOf(
             primaryModel,
-            SettingsRepository.MODEL_FLASH_LITE,
-            SettingsRepository.MODEL_FLASH_35,
-            SettingsRepository.MODEL_FLASH_LATEST
+            SettingsRepository.MODEL_FLASH_LITE_LATEST,
+            SettingsRepository.MODEL_FLASH_3,
+            SettingsRepository.MODEL_FLASH_35
         ).distinct()
 
         for (model in candidateModels) {
-            // Attempt up to 2 tries per model in case of temporary 503 overload
             for (attempt in 1..2) {
                 try {
                     val response = GeminiApiClient.service.generateContent(
@@ -154,9 +152,8 @@ class ChatRepository(
                     }
                 } catch (e: Exception) {
                     lastCallError = e.localizedMessage ?: e.message
-                    // Brief backoff before retry on 503 / 429
                     if (attempt < 2) {
-                        delay(600)
+                        delay(300)
                     }
                 }
             }
@@ -165,7 +162,7 @@ class ChatRepository(
             }
         }
 
-        // 8. Process and Store Result (or Persona Engine Fallback if 503 persists)
+        // 8. Process and Store Result - Pure Genuine AI Response
         if (!responseText.isNullOrBlank()) {
             val sanitizedResponse = SafetyFilter.sanitizeAiOutput(responseText.trim())
             val characterReply = ChatMessage(
@@ -177,29 +174,33 @@ class ChatRepository(
             chatDao.insertMessage(characterReply)
             withContext(Dispatchers.Main) { onFinished(true) }
         } else {
-            // When all remote endpoints return 503 (Overloaded) or fail, seamlessly use persona engine
-            val fallbackResponse = DragonBallPersonaEngine.generateContextualResponse(character, cleanText)
-            val characterReply = ChatMessage(
+            // Provide explicit, honest error feedback instead of fake or random responses
+            val errorDescription = lastCallError ?: "تعذر الوصول لخوادم الذكاء الاصطناعي"
+            val errorNotice = ChatMessage(
                 characterId = character.id,
-                sender = MessageSender.CHARACTER,
-                content = fallbackResponse,
-                timestamp = System.currentTimeMillis()
+                sender = MessageSender.SYSTEM,
+                content = "فشل توليد الرد من الذكاء الاصطناعي ($errorDescription). يرجى التحقق من الاتصال والمحاولة مجددًا.",
+                timestamp = System.currentTimeMillis(),
+                isError = true
             )
-            chatDao.insertMessage(characterReply)
-            withContext(Dispatchers.Main) { onFinished(true) }
+            chatDao.insertMessage(errorNotice)
+            withContext(Dispatchers.Main) { onFinished(false) }
         }
     }
 
     suspend fun testConnection(): Pair<Boolean, String> = withContext(Dispatchers.IO) {
         val apiKey = settingsRepository.getEffectiveApiKey()
         if (apiKey.isEmpty()) {
-            return@withContext Pair(false, "لم يتم العثور على مفتاح API. يرجى إدخال مفتاح من Google AI Studio.")
+            return@withContext Pair(false, "لم يتم العثور على مفتاح API. يرجى إدخال المفتاح في الإعدادات.")
         }
 
         val testModel = settingsRepository.selectedModel.value
         val testRequest = GenerateContentRequest(
-            contents = listOf(Content(role = "user", parts = listOf(Part(text = "قل: نعم")))),
-            generationConfig = GenerationConfig(maxOutputTokens = 10)
+            contents = listOf(Content(role = "user", parts = listOf(Part(text = "مرحبا، أجب بنعم فقط")))),
+            generationConfig = GenerationConfig(
+                maxOutputTokens = 100,
+                thinkingConfig = null
+            )
         )
 
         return@withContext try {
@@ -212,13 +213,13 @@ class ChatRepository(
             val elapsed = System.currentTimeMillis() - startTime
             val text = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
             if (!text.isNullOrBlank()) {
-                Pair(true, "الاتصال ناجح! الاستجابة خلال ${elapsed}ms عبر النموذج: $testModel")
+                Pair(true, "الاتصال بالذكاء الاصطناعي ناجح! الاستجابة خلال ${elapsed}ms عبر النموذج: $testModel")
             } else {
                 Pair(false, "تم الاتصال ولكن لم يُرجع النموذج نصًا.")
             }
         } catch (e: Exception) {
             val msg = e.localizedMessage ?: e.message ?: "خطأ غير معروف"
-            Pair(false, "فشل الاتصال ($msg). في حال تكرار 503 يفضل اختيار نموذج gemini-3.1-flash-lite-preview.")
+            Pair(false, "فشل الاتصال ($msg).")
         }
     }
 

@@ -41,6 +41,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
@@ -128,7 +130,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
         topBar = {
             DragonBallTopBar(
                 title = character.nameAr,
-                subtitle = if (isGenerating) "يكتب الآن…" else character.statusTextAr,
+                subtitle = if (isGenerating) "يكتب الآن عبر الذكاء الاصطناعي…" else character.statusTextAr,
                 avatarRes = character.avatarRes,
                 avatarBorderColor = character.accentColor,
                 onAvatarClick = { showFullImageDialog = true },
@@ -260,6 +262,37 @@ fun ChatScreen(viewModel: ChatViewModel) {
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                item {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .testTag("ai_engine_indicator_banner")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "محادثة ذكاء اصطناعي حية ومباشرة عبر Google Gemini الرسمية",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+
                 items(messages, key = { it.id }) { message ->
                     ChatMessageBubble(
                         message = message,

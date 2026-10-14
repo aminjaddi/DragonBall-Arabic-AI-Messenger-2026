@@ -37,11 +37,18 @@ class ExampleRobolectricTest {
     }
 
     @Test
-    fun `verify persona engine generates responses for all characters`() {
+    fun `verify all characters have valid system instructions and greetings`() {
         val characters = CharacterData.characters
         characters.forEach { char ->
-            val reply = com.example.util.DragonBallPersonaEngine.generateContextualResponse(char, "مرحبا")
-            assertTrue(reply.isNotEmpty())
+            assertTrue(char.systemInstruction.isNotEmpty())
+            assertTrue(char.initialGreetingAr.isNotEmpty())
+            assertTrue(char.nameAr.isNotEmpty())
         }
+    }
+
+    @Test
+    fun `verify safety filter validates appropriate messages`() {
+        val validation = SafetyFilter.validateMessage("مرحبًا يا فريزا كيف حالك؟")
+        assertTrue(validation.isClean)
     }
 }
